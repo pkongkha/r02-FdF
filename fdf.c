@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/06 23:12:39 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/01 16:08:28 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/02/01 18:06:47 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,15 +66,12 @@ void	fdf_proj_node(struct s_fdf_info *info, int x, int y)
 
 	xlf = (x - (info->map.w - 1) / 2) * info->view.scale;
 	ylf = (y - (info->map.h - 1) / 2) * info->view.scale;
-	z = (info->map.matrix[idx].altitude - ((info->map.max_altitude + info->map.min_altitude) / 2.0)) * info->view.scale;
+	z = (info->map.matrix[idx].altitude - (info->map.mid_altitude)) * info->view.scale;
 	fdf_rot_z(&xlf, &ylf, rot);
 	fdf_rot_y(&xlf, &z, rot);
 	fdf_rot_x(&ylf, &z, rot);
 	info->proj.mat[idx].x = xlf + info->view.slide.x;
 	info->proj.mat[idx].y = ylf + info->view.slide.y;
-	// info->proj.mat[idx].y = (x * cos(xrot) * sin(yrot)) + (y * sin(xrot)) + (z * cos(xrot) * cos(yrot)) * info->view.scale + START_Y;
-	// ft_printf("Current rotation is %d,%d\n", (int)(xrot * RAD2DEG), (int)(yrot * RAD2DEG));
-	// ft_printf("%2d|%d,%-3d ", info->map.matrix[idx].altitude, info->proj.mat[idx].x, info->proj.mat[idx].y);
 }
 
 void	fdf_proj(struct s_fdf_info *info)
@@ -98,63 +95,16 @@ void	fdf_proj(struct s_fdf_info *info)
 			++x;
 		}
 		++y;
-		// ft_printf("\n");
 	}
 }
 
 void	write_pixel_to_img(struct s_fdf_img *img, int x, int y, struct s_fdf_color *color)
 {
-	// ft_printf("Write: x=%d, y=%d, color=%.2X%.2X%.2X%.2X\n", x, y, color->a, color->r, color->g, color->b);
 	*(uint32_t*)(img->data + y * img->line_size + x * 4) =
 		(color->a << img->pfmt.ashift)
 		| (color->r << img->pfmt.rshift)
 		| (color->g << img->pfmt.gshift)
 		| color->b << img->pfmt.bshift;
-}
-
-int	ft_abs(int n)
-{
-	return (n * (1 - 2 * (n < 0)));
-}
-
-int	ft_max(int a, int b)
-{
-	if (a > b)
-		return (a);
-	else
-		return (b);
-}
-
-void	bresenham_vars_init(struct s_bresenham_vars *v, struct s_fdf_line *l)
-{
-	v->dx = ft_abs(l->x2 - l->x1);
-	v->dy = -ft_abs(l->y2 - l->y1);
-	v->sx = 1 - 2 * (l->x1 >= l->x2);
-	v->sy = 1 - 2 * (l->y1 >= l->y2);
-	v->err = v->dx + v->dy;
-}
-
-int	bresenham_calculate_next(int *x, int *y, struct s_bresenham_vars *v, struct s_fdf_line *l)
-{
-	if (*x == l->x2 && *y == l->y2)
-		return (0);
-	v->e2 = 2 * v->err;
-	if (v->e2 > v->dy)
-	{
-		v->err += v->dy;
-		*x += v->sx;
-	}
-	if (v->e2 < v->dx)
-	{
-		v->err += v->dx;
-		*y += v->sy;
-	}
-	return (1);
-}
-
-int	is_pixel_in_range(struct s_fdf_img *im, int x, int y)
-{
-	return (x >= 0 && x < im->w && y >= 0 && y < im->h);
 }
 
 int	is_line_outside_range(struct s_fdf_img *im, struct s_fdf_line *l)
@@ -169,18 +119,13 @@ int	is_line_outside_range(struct s_fdf_img *im, struct s_fdf_line *l)
 		   |((l->y2 >= im->h) << 3));
 }
 
-uint8_t	get_gradient_channel(uint8_t c1, uint8_t c2, double ratio)
-{
-	return (c1 + (c2 - c1) * ratio);
-}
-
 void	get_gradient(struct s_fdf_color *cdst, struct s_fdf_color *c1, struct s_fdf_color *c2, double ratio)
 {
 	*cdst = (struct s_fdf_color){
-			.a = get_gradient_channel(c1->a, c2->a, ratio),
-			.r = get_gradient_channel(c1->r, c2->r, ratio),
-			.g = get_gradient_channel(c1->g, c2->g, ratio),
-			.b = get_gradient_channel(c1->b, c2->b, ratio)
+			.a = c1->a + (c2->a - c1->a) * ratio,
+			.r = c1->r + (c2->r - c1->r) * ratio,
+			.g = c1->g + (c2->g - c1->g) * ratio,
+			.b = c1->b + (c2->b - c1->b) * ratio
 	};
 }
 
@@ -188,31 +133,50 @@ void	fdf_draw_line(struct s_fdf_img *img, struct s_fdf_line *l)
 {
 	struct s_bresenham_vars		v;
 	struct s_fdf_gradient_step	s;
-	struct s_fdf_color			c;
 	int							x;
 	int							y;
 
 	x = l->x1;
 	y = l->y1;
-	bresenham_vars_init(&v, l);
+	v.dx = abs(l->x2 - l->x1);
+	v.dy = -abs(l->y2 - l->y1);
 	if (is_line_outside_range(img, l))
 		return;
 	else if (v.dx == 0 && v.dy == 0)
 	{
-		write_pixel_to_img(img, l->x2, l->y2, &l->c2);
+		*(uint32_t*)(img->data + y * img->line_size + x * 4) =
+			(l->c2.a << img->pfmt.ashift)
+			| (l->c2.r << img->pfmt.rshift)
+			| (l->c2.g << img->pfmt.gshift)
+			| (l->c2.b << img->pfmt.bshift);
 		return;
 	}
-	s = (struct s_fdf_gradient_step){.curr = 0, .total = ft_max(v.dx, -v.dy)};
+	v.sx = 1 - 2 * (l->x1 >= l->x2);
+	v.sy = 1 - 2 * (l->y1 >= l->y2);
+	v.err = v.dx + v.dy;
+	s = (struct s_fdf_gradient_step){.curr = 0, .total = (v.dx - v.dy + abs(v.dx + v.dy)) / 2};
 	while (1)
 	{
-		if (is_pixel_in_range(img, x, y))
-		{
-			// ft_printf("Draw %d,%d\n", x, y);
-			get_gradient(&c, &l->c1, &l->c2, s.curr / s.total);
-			write_pixel_to_img(img, x, y, &c);
-		}
-		if (!bresenham_calculate_next(&x, &y, &v, l))
+		s.ratio = s.curr / s.total;
+		if (x >= 0 && x < img->w && y >= 0 && y < img->h)
+			*(uint32_t*)(img->data + y * img->line_size + x * 4) =
+				((uint8_t)(l->c1.a + (l->c2.a - l->c1.a) * s.ratio) << img->pfmt.ashift)
+				| ((uint8_t)(l->c1.r + (l->c2.r - l->c1.r) * s.ratio) << img->pfmt.rshift)
+				| ((uint8_t)(l->c1.g + (l->c2.g - l->c1.g) * s.ratio) << img->pfmt.gshift)
+				| ((uint8_t)(l->c1.b + (l->c2.b - l->c1.b) * s.ratio) << img->pfmt.bshift);
+		if (x == l->x2 && y == l->y2)
 			break;
+		v.e2 = 2 * v.err;
+		if (v.e2 > v.dy)
+		{
+			v.err += v.dy;
+			x += v.sx;
+		}
+		if (v.e2 < v.dx)
+		{
+			v.err += v.dx;
+			y += v.sy;
+		}
 		s.curr += 1;
 	}
 }
@@ -232,9 +196,6 @@ void	render(struct s_fdf_info *info)
 		while (x < info->map.w)
 		{
 			idx = y * info->map.w + x;
-			// ft_printf("%3d,%3d|", info->proj.mat[idx].x, info->proj.mat[idx].y);
-			// ft_printf("%d,0x%.2X%.2X%.2X%.2X|", info->map.matrix[idx].altitude, info->map.matrix[idx].color.a, info->map.matrix[idx].color.r, info->map.matrix[idx].color.g, info->map.matrix[idx].color.b);
-			// write_pixel_to_img(&info->img, info->proj.mat[idx].x, info->proj.mat[idx].y, &info->map.matrix[idx].color);
 			if (x + 1 < info->map.w)
 				fdf_draw_line(&info->img, &(struct s_fdf_line){
 					.x1 = info->proj.mat[idx].x,
@@ -255,7 +216,6 @@ void	render(struct s_fdf_info *info)
 				});
 			++x;
 		}
-		// ft_printf("\n");
 		++y;
 	}
 }
@@ -275,13 +235,11 @@ void	set_rotation(double *target, double rot)
 		rot -= M_PI * 2;
 	else if (rot < -M_PI)
 		rot += M_PI * 2;
-	ft_printf("rot is set to %d\n", (int)(rot * RAD2DEG));
 	*target = rot;
 }
 
 int	key_hook(int keycode, struct s_fdf_info *info)
 {
-	ft_printf("%#x\n", keycode);
 	if (keycode == KB_SCALE_UP)
 		set_scale(info, info->view.scale + VIEW_SCALE_STEP);
 	else if (keycode == KB_SCALE_DOWN)

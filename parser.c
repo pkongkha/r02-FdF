@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 00:23:16 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/01 16:05:58 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/02/01 16:49:31 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ int	fdf_map_init(struct s_fdf_map *map, size_t w, size_t h)
 	map->h = h;
 	map->w = w;
 	map->max_altitude = INT_MIN;
+	map->mid_altitude = 0;
 	map->min_altitude = INT_MAX;
 	return (0);
 }
@@ -123,7 +124,6 @@ int	fdf_setnode(struct s_fdf_node *node, char *str)
 {
 	uint32_t	color;
 	node->altitude = ft_atoi(str);
-	ft_printf("%d ", node->altitude);
 	while (ft_isdigit(*str) || *str == '-' || *str == '+')
 		++str;
 	if (*str == ',')
@@ -139,14 +139,13 @@ void	fdf_map_parse_line(struct s_fdf_map *map, char *str, size_t line)
 	size_t				col;
 
 	col = 0;
-	ft_printf("\n");
 	while (ft_isspace(*str))
 		++str;
 	while (*str)
 	{
 		if (fdf_setnode(map->matrix + map->w * line + col, str))
 			map->custom_color = 1;
-		while (!ft_isspace(*str))
+		while (!ft_isspace(*str) && *str)
 			++str;
 		if (!*str)
 			return;
@@ -173,6 +172,7 @@ void	fdf_map_get_alt_range(struct s_fdf_map *map)
 			map->min_altitude = map->matrix[i].altitude;
 		++i;
 	}
+	map->mid_altitude = (map->max_altitude + map->min_altitude) / 2;
 }
 
 void	fdf_map_normalize(struct s_fdf_map *map)
@@ -182,9 +182,10 @@ void	fdf_map_normalize(struct s_fdf_map *map)
 
 	i = 0;
 	while (i < maxi)
-		map->matrix[i++].altitude += map->min_altitude;
-	map->max_altitude += map->min_altitude;
+		map->matrix[i++].altitude -= map->min_altitude;
+	map->max_altitude -= map->min_altitude;
 	map->min_altitude = 0;
+	map->mid_altitude = map->max_altitude / 2;
 }
 
 int	fdf_map_from_file(struct s_fdf_map *map, const char *filename)

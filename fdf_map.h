@@ -35,7 +35,7 @@ struct s_bresenham_vars
 
 struct s_fdf_node
 {
-	int					altitude;
+	double				altitude;
 	struct s_fdf_color	color;
 };
 
@@ -45,6 +45,7 @@ struct s_fdf_map
 	int					w;
 	int					h;
 	int					min_altitude;
+	int					mid_altitude;
 	int					max_altitude;
 	int					custom_color;
 };
