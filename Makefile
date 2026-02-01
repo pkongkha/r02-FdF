@@ -4,7 +4,7 @@ OBJS := $(SRCS:%.c=$(OBJDIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 ORIG_CFLAGS := $(CFLAGS)
-CFLAGS += -Wall -Wextra -Werror
+CFLAGS += -Wall -Wextra -Werror -pedantic -pedantic-errors
 CFLAGS += -MMD -MP
 CFLAGS += -Ilibft
 LDFLAGS += -Llibft
