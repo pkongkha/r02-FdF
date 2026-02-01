@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/06 22:56:41 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/01/18 02:57:53 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/01/18 04:40:45 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ struct s_fdf_pixelformat
 	uint8_t		bshift;
 };
 
-struct s_fdf_image
+struct s_fdf_img
 {
 	void						*img;
 	char						*data;
@@ -74,8 +74,8 @@ struct s_fdf_info
 	struct s_fdf_map	map;
 	struct s_fdf_proj	proj;
 	struct s_fdf_view	view;
-	struct s_win_info	win;
-	struct s_fdf_image	img;
+	struct s_fdf_win	win;
+	struct s_fdf_img	img;
 	void				(*auto_func)(struct s_fdf_info*);
 	int					is_changed;
 };

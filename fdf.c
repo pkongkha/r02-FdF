@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/06 23:12:39 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/01/18 03:04:11 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/01/18 05:41:57 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #endif
 #include "config.h"
 #include "fdf.h"
+#include <stdlib.h>
 #include <libft.h>
 #include <mlx.h>
 #include <X11/X.h>
@@ -65,7 +66,7 @@ void	fdf_proj_node(struct s_fdf_info *info, int x, int y)
 
 	xlf = (x - (info->map.w - 1) / 2) * info->view.scale;
 	ylf = (y - (info->map.h - 1) / 2) * info->view.scale;
-	z = (info->map.matrix[idx].altitude - (info->map.max_altitude / 2)) * info->view.scale;
+	z = (info->map.matrix[idx].altitude - ((info->map.max_altitude + info->map.min_altitude) / 2.0)) * info->view.scale;
 	fdf_rot_z(&xlf, &ylf, rot);
 	fdf_rot_y(&xlf, &z, rot);
 	fdf_rot_x(&ylf, &z, rot);
@@ -101,7 +102,7 @@ void	fdf_proj(struct s_fdf_info *info)
 	}
 }
 
-void	write_pixel_to_img(struct s_fdf_image *img, int x, int y, struct s_fdf_color *color)
+void	write_pixel_to_img(struct s_fdf_img *img, int x, int y, struct s_fdf_color *color)
 {
 	// ft_printf("Write: x=%d, y=%d, color=%.2X%.2X%.2X%.2X\n", x, y, color->a, color->r, color->g, color->b);
 	*(uint32_t*)(img->data + y * img->line_size + x * 4) =
@@ -151,12 +152,12 @@ int	bresenham_calculate_next(int *x, int *y, struct s_bresenham_vars *v, struct 
 	return (1);
 }
 
-int	is_pixel_in_range(struct s_fdf_image *im, int x, int y)
+int	is_pixel_in_range(struct s_fdf_img *im, int x, int y)
 {
 	return (x >= 0 && x < im->w && y >= 0 && y < im->h);
 }
 
-int	is_line_outside_range(struct s_fdf_image *im, struct s_fdf_line *l)
+int	is_line_outside_range(struct s_fdf_img *im, struct s_fdf_line *l)
 {
 	return ((l->x1 < 0)
 	       |((l->x1 >= im->w) << 1)
@@ -183,7 +184,7 @@ void	get_gradient(struct s_fdf_color *cdst, struct s_fdf_color *c1, struct s_fdf
 	};
 }
 
-void	fdf_draw_line(struct s_fdf_image *img, struct s_fdf_line *l)
+void	fdf_draw_line(struct s_fdf_img *img, struct s_fdf_line *l)
 {
 	struct s_bresenham_vars		v;
 	struct s_fdf_gradient_step	s;
@@ -305,6 +306,8 @@ int	key_hook(int keycode, struct s_fdf_info *info)
 		info->view.slide.x += VIEW_SLIDE_STEP;
 	else if (keycode == KB_VIEW_SLIDE_LEFT)
 		info->view.slide.x -= VIEW_SLIDE_STEP;
+	else if (keycode == XK_Escape)
+		mlx_loop_end(info->win.disp);
 	info->is_changed = 1;
 	return (0);
 }
@@ -319,7 +322,7 @@ int	loop_hook(struct s_fdf_info *info)
 	return 0;
 }
 
-void	image_get_pixelformat(struct s_fdf_image *img)
+void	image_get_pixelformat(struct s_fdf_img *img)
 {
 	if (img->endian == 0)
 	{
@@ -363,36 +366,110 @@ void	fdf_auto_color(struct s_fdf_map *map)
 	}
 }
 
+void	fdf_default_view(struct s_fdf_view *v)
+{
+	*v = (struct s_fdf_view) {
+		.scale = VIEW_SCALE_DEFAULT,
+		.rot.x = VIEW_ROT_X_DEFAULT,
+		.rot.y = VIEW_ROT_Y_DEFAULT,
+		.rot.z = VIEW_ROT_Z_DEFAULT,
+		.slide.x = VIEW_SLIDE_X_DEFAULT,
+		.slide.y = VIEW_SLIDE_Y_DEFAULT
+	};
+}
+
+void	*fdf_img_init(struct s_fdf_img *img, void *disp, int w, int h)
+{
+	*img = (struct s_fdf_img){ .bpp = 0, .data = NULL, .endian = 0, .w = 0, .h = 0, .img = NULL, .line_size = 0, .pfmt = {0} };
+	img->img = mlx_new_image(disp, w, h);
+	if (!img->img)
+		return (NULL);
+	img->data = (char*)mlx_get_data_addr(img->img, &img->bpp, &img->line_size, &img->endian);
+	if (!img->data)
+		return (mlx_destroy_image(disp, img->img), NULL);
+	img->w = w;
+	img->h = h;
+	image_get_pixelformat(img);
+	return (img->img);
+}
+
+void	*fdf_proj_init(struct s_fdf_proj *p, int w, int h)
+{
+	*p = (struct s_fdf_proj) { .mat = NULL, .w = 0, .h = 0 };
+	p->mat = ft_calloc(w * h, sizeof(*p->mat));
+	if (!p->mat)
+		return (NULL);
+	p->w = w;
+	p->h = h;
+	return (p->mat);
+}
+
+void	*fdf_windo_init(struct s_fdf_win *win, char *title, int w, int h)
+{
+	*win = (struct s_fdf_win){ .disp = NULL, .win = NULL, .w = 0, .h = 0 };
+	win->disp = mlx_init();
+	if (!win->disp)
+		return (NULL);
+	win->win = mlx_new_window(win->disp, w, h, title);
+	win->w = w;
+	win->h = h;
+	if (!win->win)
+		return (mlx_destroy_display(win->disp), NULL);
+	return (win->win);
+}
+
+void	fdf_info_cleanup(struct s_fdf_info *info)
+{
+	if (info->win.disp)
+	{
+		if (info->win.win)
+			mlx_destroy_window(info->win.disp, info->win.win);
+		if (info->img.img)
+			mlx_destroy_image(info->win.disp, info->img.img);
+		mlx_destroy_display(info->win.disp);
+	}
+	if (info->proj.mat)
+	{
+		free(info->proj.mat);
+		ft_bzero(&info->proj, sizeof(info->proj));
+	}
+	if (info->map.matrix)
+	{
+		free(info->map.matrix);
+		ft_bzero(&info->map, sizeof(info->map));
+	}
+}
+
+int	fdf_info_init(struct s_fdf_info *info, const char *mapfile)
+{
+	ft_bzero(info, sizeof(*info));
+	if (fdf_map_from_file(&info->map, mapfile) != 0)
+		return (fdf_info_cleanup(info), 0);
+	info->is_changed = 1;
+	if (!fdf_windo_init(&info->win, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT))
+		return (fdf_info_cleanup(info), 0);
+	if (!fdf_img_init(&info->img, info->win.disp, info->win.w, info->win.h))
+		return (fdf_info_cleanup(info), 0);
+	if (!fdf_proj_init(&info->proj, info->map.w, info->map.h))
+		return (fdf_info_cleanup(info), 0);
+	if (!info->map.custom_color)
+		fdf_auto_color(&info->map);
+	fdf_default_view(&info->view);
+	return (1);
+}
+
 int main(int argc, char const *argv[])
 {
 	struct s_fdf_info	info;
 
-	info.map.custom_color = 0;
-	info.win = (struct s_win_info){ .w = WINDOW_WIDTH, .h = WINDOW_HEIGHT };
-	if (argc != 2 || fdf_map_from_file(&info.map, argv[1]) != 0)
+	if (argc != 2)
 		return (1);
-	info.is_changed = 1;
-	info.win.disp = mlx_init();
-	info.win.win = mlx_new_window(info.win.disp, info.win.w, info.win.h, WINDOW_TITLE);
-	info.view.scale = VIEW_SCALE_DEFAULT;
-	info.view.rot.x = VIEW_ROT_X_DEFAULT;
-	info.view.rot.y = VIEW_ROT_Y_DEFAULT;
-	info.view.rot.z = VIEW_ROT_Z_DEFAULT;
-	ft_printf("%d, %d\n", info.win.w, info.win.h);
-	info.img.img = mlx_new_image(info.win.disp, info.win.w, info.win.h);
-	info.img.w = info.win.w;
-	info.img.h = info.win.h;
-	info.img.data = (char*)mlx_get_data_addr(info.img.img, &info.img.bpp, &info.img.line_size, &info.img.endian);
-	image_get_pixelformat(&info.img);
-	info.view.slide.x = VIEW_SLIDE_X_DEFAULT;
-	info.view.slide.y = VIEW_SLIDE_Y_DEFAULT;
-	info.proj.w = info.map.w;
-	info.proj.h = info.map.h;
-	info.proj.mat = ft_calloc(info.proj.h * info.proj.w, sizeof(*info.proj.mat));
-	if (!info.map.custom_color)
-		fdf_auto_color(&info.map);
-	mlx_loop_hook(info.win.disp, &loop_hook, &info);
-	mlx_hook(info.win.win, KeyPress, KeyPressMask, key_hook, &info);
-	mlx_loop(info.win.disp);
+	if (fdf_info_init(&info, argv[1]))
+	{
+		mlx_loop_hook(info.win.disp, &loop_hook, &info);
+		mlx_hook(info.win.win, KeyPress, KeyPressMask, key_hook, &info);
+		mlx_loop(info.win.disp);
+	}
+	fdf_info_cleanup(&info);
 	return (0);
 }

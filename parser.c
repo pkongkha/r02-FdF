@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 00:23:16 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/01/18 01:35:29 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/01/18 05:36:52 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,11 @@ int	fdf_map_init(struct s_fdf_map *map, size_t w, size_t h)
 	map->matrix = ft_calloc(w * h, sizeof(*(map->matrix)));
 	if (!map->matrix)
 		return (ENOMEM);
-	map->w = w;
+	map->custom_color = 0;
 	map->h = h;
+	map->w = w;
+	map->max_altitude = INT_MIN;
+	map->min_altitude = INT_MAX;
 	return (0);
 }
 
@@ -119,7 +122,8 @@ int	fdf_setnode(struct s_fdf_node *node, char *str)
 {
 	uint32_t	color;
 	node->altitude = ft_atoi(str);
-	while (ft_isdigit(*str))
+	ft_printf("%d ", node->altitude);
+	while (ft_isdigit(*str) || *str == '-' || *str == '+')
 		++str;
 	if (*str == ',')
 		color = ft_hexstrtou32(str + 1);
@@ -134,6 +138,7 @@ void	fdf_map_parse_line(struct s_fdf_map *map, char *str, size_t line)
 	size_t				col;
 
 	col = 0;
+	ft_printf("\n");
 	while (ft_isspace(*str))
 		++str;
 	while (*str)
@@ -150,18 +155,21 @@ void	fdf_map_parse_line(struct s_fdf_map *map, char *str, size_t line)
 	}
 }
 
-void	fdf_map_get_max_alt(struct s_fdf_map *map)
+void	fdf_map_get_alt_range(struct s_fdf_map *map)
 {
 	size_t	i;
 	size_t	maxi;
 
 	i = 0;
 	maxi = map->h * map->w;
+	map->min_altitude = INT_MAX;
 	map->max_altitude = INT_MIN;
 	while (i < maxi)
 	{
 		if (map->max_altitude < map->matrix[i].altitude)
 			map->max_altitude = map->matrix[i].altitude;
+		if (map->min_altitude > map->matrix[i].altitude)
+			map->min_altitude = map->matrix[i].altitude;
 		++i;
 	}
 }
@@ -181,7 +189,7 @@ int	fdf_map_from_file(struct s_fdf_map *map, const char *filename)
 	{
 		buf = get_next_line(fd);
 		if (!buf)
-			return (fdf_map_get_max_alt(map), close(fd), 0);
+			return (fdf_map_get_alt_range(map), close(fd), 0);
 		fdf_map_parse_line(map, buf, line++);
 		free(buf);
 	}
