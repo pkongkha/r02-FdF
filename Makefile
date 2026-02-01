@@ -7,7 +7,8 @@ ORIG_CFLAGS := $(CFLAGS)
 CFLAGS += -Wall -Wextra -Werror
 CFLAGS += -MMD -MP
 CFLAGS += -Ilibft
-LDFLAGS += -Llibft -lft -lm -lmlx -lX11 -lXext
+LDFLAGS += -Llibft
+LDLIBS := -lft -lm -lmlx -lX11 -lXext
 unexport CFLAGS LDFLAGS
 
 CC ?= cc
@@ -33,6 +34,6 @@ $(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(NAME): $(OBJS) | libft/libft.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 -include $(DEPS)
