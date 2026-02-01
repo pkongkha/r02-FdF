@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/06 23:12:39 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/01/18 05:41:57 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/02/01 16:08:28 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,6 +355,8 @@ void	fdf_auto_color(struct s_fdf_map *map)
 	struct s_fdf_color chigh;
 	struct s_fdf_color clow;
 
+	if (map->max_altitude == 0)
+		return;
 	get_color_from_aarrggbb(&chigh, DEFAULT_HIGH_COLOR);
 	get_color_from_aarrggbb(&clow, DEFAULT_LOW_COLOR);
 	i = 0;
@@ -427,6 +429,8 @@ void	fdf_info_cleanup(struct s_fdf_info *info)
 		if (info->img.img)
 			mlx_destroy_image(info->win.disp, info->img.img);
 		mlx_destroy_display(info->win.disp);
+		free(info->win.disp);
+		info->win.disp = NULL;
 	}
 	if (info->proj.mat)
 	{
@@ -440,11 +444,14 @@ void	fdf_info_cleanup(struct s_fdf_info *info)
 	}
 }
 
+void	fdf_map_normalize(struct s_fdf_map *map);
+
 int	fdf_info_init(struct s_fdf_info *info, const char *mapfile)
 {
 	ft_bzero(info, sizeof(*info));
 	if (fdf_map_from_file(&info->map, mapfile) != 0)
 		return (fdf_info_cleanup(info), 0);
+	fdf_map_normalize(&info->map);
 	info->is_changed = 1;
 	if (!fdf_windo_init(&info->win, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT))
 		return (fdf_info_cleanup(info), 0);

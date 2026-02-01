@@ -6,13 +6,14 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 00:23:16 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/01/18 05:36:52 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/02/01 16:05:58 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf_map.h"
 #include <errno.h>
 #include <libft.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -172,6 +173,18 @@ void	fdf_map_get_alt_range(struct s_fdf_map *map)
 			map->min_altitude = map->matrix[i].altitude;
 		++i;
 	}
+}
+
+void	fdf_map_normalize(struct s_fdf_map *map)
+{
+	size_t			i;
+	const size_t	maxi = map->h * map->w;
+
+	i = 0;
+	while (i < maxi)
+		map->matrix[i++].altitude += map->min_altitude;
+	map->max_altitude += map->min_altitude;
+	map->min_altitude = 0;
 }
 
 int	fdf_map_from_file(struct s_fdf_map *map, const char *filename)
