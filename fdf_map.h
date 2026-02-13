@@ -14,24 +14,7 @@
 # define FDF_MAP_H
 # include <stdint.h>
 # include <stddef.h>
-
-struct s_fdf_color
-{
-	uint8_t	a;
-	uint8_t	r;
-	uint8_t	g;
-	uint8_t	b;
-};
-
-struct s_bresenham_vars
-{
-	int	dx;
-	int	dy;
-	int	sx;
-	int	sy;
-	int	err;
-	int e2;
-};
+# include "fdf_color.h"
 
 struct s_fdf_node
 {
@@ -50,31 +33,9 @@ struct s_fdf_map
 	int					custom_color;
 };
 
-struct s_fdf_rot
-{
-	double	x;
-	double	y;
-	double	z;
-	double	sinx;
-	double	cosx;
-	double	siny;
-	double	cosy;
-	double	sinz;
-	double	cosz;
-};
-
-struct s_fdf_slide
-{
-	int	x;
-	int	y;
-};
-
-struct s_fdf_view
-{
-	double				scale;
-	struct s_fdf_slide	slide;
-	struct s_fdf_rot	rot;
-};
-
-int	fdf_map_from_file(struct s_fdf_map *map, const char *filename);
+int		fdf_map_from_file(struct s_fdf_map *map, const char *filename);
+void	fdf_map_get_alt_range(struct s_fdf_map *map);
+int		fdf_map_init(struct s_fdf_map *map, size_t w, size_t h);
+void	fdf_map_normalize(struct s_fdf_map *map);
+void	fdf_map_parse_line(struct s_fdf_map *map, char *str, size_t line);
 #endif

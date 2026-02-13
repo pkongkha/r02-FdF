@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   config.h                                           :+:      :+:    :+:   */
+/*   fdf_config.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 01:09:44 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/01 15:14:19 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/02/13 12:30:52 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONFIG_H
-# define CONFIG_H
+#ifndef FDF_CONFIG_H
+# define FDF_CONFIG_H
 # include <X11/keysym.h>
 # ifndef __USE_MISC
 #  define __USE_MISC
@@ -30,17 +30,24 @@
 # define VIEW_SCALE_STEP 1.0
 # define VIEW_SCALE_MAX  100.0
 
-# define DEG2RAD (M_PI/180.0)
-# define RAD2DEG (180.0/M_PI)
+// M_PI/180
+# define DEG2RAD 0.01745329251994329547437168059786927187815308570861816406250
+// 180/M_PI
+# define RAD2DEG 57.295779513082322864647721871733665466308593750
 
-# define VIEW_ROT_X_DEFAULT ((90.0-35.2643896827546541317133232951164245605468750) * DEG2RAD)
-# define VIEW_ROT_X_STEP (1.0 * DEG2RAD)
-# define VIEW_ROT_Y_DEFAULT (0)
-# define VIEW_ROT_Y_STEP (1.0 * DEG2RAD)
-# define VIEW_ROT_Z_DEFAULT (45.0 * DEG2RAD)
-# define VIEW_ROT_Z_STEP (1.0 * DEG2RAD)
-# define VIEW_SLIDE_X_DEFAULT (WINDOW_WIDTH / 2)
-# define VIEW_SLIDE_Y_DEFAULT (WINDOW_HEIGHT / 2)
+# define VIEW_ROT_X_DEFAULT\
+	0.955316618124509298048963046312564983963966369628906250
+# define VIEW_ROT_X_STEP\
+	0.01745329251994329547437168059786927187815308570861816406250
+# define VIEW_ROT_Y_DEFAULT 0
+# define VIEW_ROT_Y_STEP\
+	0.01745329251994329547437168059786927187815308570861816406250
+# define VIEW_ROT_Z_DEFAULT\
+	0.785398163397448278999490867136046290397644042968750
+# define VIEW_ROT_Z_STEP\
+	0.01745329251994329547437168059786927187815308570861816406250
+# define VIEW_SLIDE_X_DEFAULT 640
+# define VIEW_SLIDE_Y_DEFAULT 360
 # define VIEW_SLIDE_STEP 20
 
 # define DEFAULT_HIGH_COLOR 0x00FF91FF
