@@ -1,36 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.c                                              :+:      :+:    :+:   */
+/*   fdf_windo_init.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/06 23:12:39 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/11 16:48:15 by pkongkha         ###   ########.fr       */
+/*   Created: 2026/02/09 12:16:52 by pkongkha          #+#    #+#             */
+/*   Updated: 2026/02/11 16:56:44 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf_windo.h"
-#include "fdf_info.h"
-#include "fdf_hook.h"
 
-#include <libft.h>
 #include <mlx.h>
-#include <X11/X.h>
-#include <X11/keysym.h>
 
-int	main(int argc, char const *argv[])
+#include <stddef.h>
+
+void	*fdf_windo_init(struct s_fdf_windo *win, char *title, int w, int h)
 {
-	struct s_fdf_info	info;
-
-	if (argc != 2)
-		return (1);
-	if (fdf_info_init(&info, argv[1]))
-	{
-		mlx_loop_hook(info.win.disp, &fdf_hook_loop, &info);
-		mlx_hook(info.win.win, KeyPress, KeyPressMask, &fdf_hook_key, &info);
-		mlx_loop(info.win.disp);
-	}
-	fdf_info_cleanup(&info);
-	return (0);
+	*win = (struct s_fdf_windo){.disp = NULL, .win = NULL, .w = 0, .h = 0};
+	win->disp = mlx_init();
+	if (!win->disp)
+		return (NULL);
+	win->win = mlx_new_window(win->disp, w, h, title);
+	win->w = w;
+	win->h = h;
+	if (!win->win)
+		return (mlx_destroy_display(win->disp), NULL);
+	return (win->win);
 }

@@ -1,24 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   display.h                                          :+:      :+:    :+:   */
+/*   fdf_view_rot_z.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/06 22:27:39 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/01 15:14:10 by pkongkha         ###   ########.fr       */
+/*   Created: 2026/02/11 15:54:22 by pkongkha          #+#    #+#             */
+/*   Updated: 2026/02/11 16:57:02 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#include "fdf_view.h"
 
-struct s_fdf_win
+void	fdf_rot_z(double *x, double *y, struct s_fdf_rot *r)
 {
-	void	*disp;
-	void	*win;
-	int		w;
-	int		h;
-};
+	const double	x_o = *x;
 
-#endif
+	*x = *x * r->cosz - *y * r->sinz;
+	*y = x_o * r->sinz + *y * r->cosz;
+}

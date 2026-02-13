@@ -1,26 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   fdf_img.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/06 22:56:41 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/01 15:14:25 by pkongkha         ###   ########.fr       */
+/*   Created: 2026/02/09 12:16:22 by pkongkha          #+#    #+#             */
+/*   Updated: 2026/02/13 12:06:48 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FDF_H
-# define FDF_H
-# include "fdf_map.h"
-# include "display.h"
+#ifndef FDF_IMG_H
+# define FDF_IMG_H
+# include "fdf_color.h"
+
+struct s_bresenham_vars
+{
+	int	x;
+	int	y;
+	int	dx;
+	int	dy;
+	int	sx;
+	int	sy;
+	int	err;
+	int	e2;
+};
+
+struct s_fdf_gradient_step
+{
+	double	curr;
+	double	ratio;
+	double	total;
+};
 
 struct s_fdf_line
 {
-	int	x1;
-	int	y1;
-	int	x2;
-	int	y2;
+	int					x1;
+	int					y1;
+	int					x2;
+	int					y2;
 	struct s_fdf_color	c1;
 	struct s_fdf_color	c2;
 };
@@ -49,36 +67,10 @@ struct s_fdf_img
 	struct s_fdf_pixelformat	pfmt;
 };
 
-struct s_fdf_gradient_step
-{
-	double	curr;
-	double	ratio;
-	double	total;
-};
-
-struct s_fdf_proj_node
-{
-	int			x;
-	int			y;
-};
-
-struct s_fdf_proj
-{
-	struct s_fdf_proj_node	*mat;
-	int						w;
-	int						h;
-};
-
-struct s_fdf_info
-{
-	struct s_fdf_map	map;
-	struct s_fdf_proj	proj;
-	struct s_fdf_view	view;
-	struct s_fdf_win	win;
-	struct s_fdf_img	img;
-	void				(*auto_func)(struct s_fdf_info*);
-	int					is_changed;
-};
-
+void	fdf_img_draw_line(struct s_fdf_img *img, struct s_fdf_line *l);
+void	fdf_img_get_pixelfmt(struct s_fdf_img *img);
+void	*fdf_img_init(struct s_fdf_img *img, void *disp, int w, int h);
+void	fdf_img_write_pixel(struct s_fdf_img *img, int x, int y,
+			struct s_fdf_color *color);
 
 #endif
