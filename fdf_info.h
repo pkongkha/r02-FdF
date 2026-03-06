@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 20:29:55 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/11 16:48:31 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/03/06 23:36:23 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,3 +32,4 @@ struct s_fdf_info
 void	fdf_info_cleanup(struct s_fdf_info *info);
 int		fdf_info_init(struct s_fdf_info *info, const char *mapfile);
 #endif
+
