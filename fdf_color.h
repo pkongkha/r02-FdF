@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 22:14:59 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/03/06 23:36:02 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/04/27 19:47:36 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,4 +26,3 @@ void	fdf_color_from_aarrggbb(struct s_fdf_color *color, uint32_t code);
 struct	s_fdf_map;
 void	fdf_colorize_auto(struct s_fdf_map *map);
 #endif
-

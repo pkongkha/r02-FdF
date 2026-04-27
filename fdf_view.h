@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 22:12:38 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/03/06 23:36:18 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/04/27 19:47:57 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,4 +44,3 @@ void	fdf_rot_x(double *y, double *z, struct s_fdf_rot *r);
 void	fdf_rot_y(double *x, double *z, struct s_fdf_rot *r);
 void	fdf_rot_z(double *x, double *y, struct s_fdf_rot *r);
 #endif
-
