@@ -1,26 +1,33 @@
-# Learning Resource
+_This project has been created as part of the 42 curriculum by pkongkha_
 
-# Procedure
-1. To do it, first we need to locate each point on x,y projection
-    1.1 You can achieve this by using scailing
-    1.2 Then you rotate the projected point
-        1.2.1 arctan(1/sqrt(2)) deg horizonally
-        1.2.2 45 deg vertically
-2. Draw a line
-    2.1 Draw line from each point to another point
-    2.2 Apply color gradient
-3. For more accuracy
-    3.1 render the backmost line first when doing rotation
-        3.1.1 I do not personally implemented this, anyone who interested in can try
+# Description
+The project aims to provide know-how about 3D projection. Especially about _isometric_ projection.
 
+## Implementation
+First, locate the point projected on (x, y) by first apply scailing, then rotate the point, in this way, the projection would be percise.
 
-# Calculation
-$P_x = x(cos(vrot)) + z(-sin(vrot))$
-$P_y = x(-sin(hrot))(sin(vrot)) + y(cos(hrot)) + z(-sin(hrot))(cos(vrot))$
-$P_z = x(cos(hrot))(sin(vrot)) + y(sin(hrot)) + z(cos(hrot))(cos(vrot))$
+Second, draw a line connected point nearby, applying color gradient while drawing a line.
+
+## Calculation
+To project the isometric projection, use hrot = arctan(1/sqrt(2)) deg, and vrot = 45deg
+- $P_x = x(cos(vrot)) + z(-sin(vrot))$
+- $P_y = x(-sin(hrot))(sin(vrot)) + y(cos(hrot)) + z(-sin(hrot))(cos(vrot))$
+- $P_z = x(cos(hrot))(sin(vrot)) + y(sin(hrot)) + z(cos(hrot))(cos(vrot))$
 But we won't use P_z as our screen is only 2d
 
-# References
+# Instructions
+
+To build the project
+```sh
+make all
+```
+
+And to run
+```sh
+./fdf <maps_to_project>
+```
+
+# Resources
 - [Harm Smits | 42docs minilibx introduction](http://harm-smits.github.io/42docs/libs/minilibx/introduction.html)
 - [Minilibx-linux manual pages](man:mlx(3))
 - [Minilibx-linux source code](https://github.com/42paris/minilibx-linux)
