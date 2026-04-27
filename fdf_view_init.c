@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 12:16:50 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/13 10:46:13 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/04/27 17:16:49 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	fdf_view_init(struct s_fdf_view *v)
 		.rot.x = VIEW_ROT_X_DEFAULT,
 		.rot.y = VIEW_ROT_Y_DEFAULT,
 		.rot.z = VIEW_ROT_Z_DEFAULT,
-		.slide.x = VIEW_SLIDE_X_DEFAULT,
-		.slide.y = VIEW_SLIDE_Y_DEFAULT
+		.slide.x = WINDOW_WIDTH / 2,
+		.slide.y = WINDOW_HEIGHT / 2
 	};
 }

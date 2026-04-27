@@ -6,7 +6,7 @@
 /*   By: pkongkha <pkongkha@student.42bangkok.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 01:09:44 by pkongkha          #+#    #+#             */
-/*   Updated: 2026/02/13 12:30:52 by pkongkha         ###   ########.fr       */
+/*   Updated: 2026/04/27 17:18:03 by pkongkha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,6 @@
 	0.785398163397448278999490867136046290397644042968750
 # define VIEW_ROT_Z_STEP\
 	0.01745329251994329547437168059786927187815308570861816406250
-# define VIEW_SLIDE_X_DEFAULT 640
-# define VIEW_SLIDE_Y_DEFAULT 360
 # define VIEW_SLIDE_STEP 20
 
 # define DEFAULT_HIGH_COLOR 0x00FF91FF
