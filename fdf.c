@@ -29,6 +29,8 @@ int	main(int argc, char const *argv[])
 	{
 		mlx_loop_hook(info.win.disp, &fdf_hook_loop, &info);
 		mlx_hook(info.win.win, KeyPress, KeyPressMask, &fdf_hook_key, &info);
+		mlx_hook(info.win.win, DestroyNotify, KeyPressMask, &mlx_loop_end,
+			info.win.disp);
 		mlx_loop(info.win.disp);
 	}
 	fdf_info_cleanup(&info);
